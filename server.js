@@ -8,6 +8,8 @@ const express = require('express');
 const request = require('request');
 const urlencode = require('urlencode');
 
+const { logger } = require('./logger');
+
 const app = express();
 
 //app.use(express.json({limit: '50mb'}));
@@ -17,6 +19,9 @@ app.get('/resize', (req, res) => {
 	const widthStr = req.query.width;
 	const heightStr = req.query.height;
 	let imgUrl = req.query.url;
+
+  logger.info(`url: ${ imgUrl }`);
+  logger.info(`width: ${ widthStr }, height: ${ heightStr }`);
 
 	let width, height;
 	if (widthStr) {
@@ -31,12 +36,17 @@ app.get('/resize', (req, res) => {
 	const filename = split.slice(-1)[0];
 
 	imgUrl = path + '/' + urlencode(filename);
-
-	request({url: imgUrl, encoding: null}, function(err, response, buffer) {
-		sharp(buffer)
-			.resize(width, height)
-			.pipe(res);
-	});
+  
+  try {
+    request({url: imgUrl, encoding: null}, function(err, response, buffer) {
+      sharp(buffer)
+        .resize(width, height)
+        .pipe(res);
+    });
+  } catch (error) {
+    logger.error(error); 
+    res.json({ error });
+  }
 });
 
 
@@ -45,6 +55,7 @@ app.get('/test', (req, res) => {
 });
 
 //ex: http://stdio.kr:3000/?url=https://~~~~~~~~~~~~~~/uploads/photo/image/21790/1.png&width=300
-app.listen(6666, () => {
-	console.log('Server started');
+const PORT = 7777;
+app.listen(PORT, () => {
+	logger.info(`Server started at ${ PORT }`);
 });
