@@ -37,16 +37,11 @@ app.get('/resize', (req, res) => {
 
 	imgUrl = path + '/' + urlencode(filename);
   
-  try {
-    request({url: imgUrl, encoding: null}, function(err, response, buffer) {
-      sharp(buffer)
-        .resize(width, height)
-        .pipe(res);
-    });
-  } catch (error) {
-    logger.error(error); 
-    res.json({ error });
-  }
+  request({url: imgUrl, encoding: null}, function(error, response, buffer) {
+    sharp(buffer)
+      .resize(width, height)
+      .pipe(res);
+  });
 });
 
 
