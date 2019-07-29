@@ -38,6 +38,12 @@ app.get('/resize', (req, res) => {
 	imgUrl = path + '/' + urlencode(filename);
   
   request({url: imgUrl, encoding: null}, function(error, response, buffer) {
+    const { statusCode, statusMessage } = response;
+    logger.info(statusCode, statusMessage)
+    if (statusCode == 403 || statusCode == 404) {
+      res.send(statusMessage) 
+      return;
+    }
     sharp(buffer)
       .resize(width, height)
       .pipe(res);
